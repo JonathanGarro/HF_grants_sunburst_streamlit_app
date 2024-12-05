@@ -136,7 +136,9 @@ if DEFAULT_FILE_PATH:
 				st.metric("Total Records", total_records)
 			with row1_col2:
 				st.metric("Total Amount", f"${total_amount:,.2f}")
-
+			
+			st.markdown("---")  # Divider
+			
 			# Second row: Median (All Grants), Median (Filtered)
 			row2_col1, row2_col2 = st.columns(2)
 			with row2_col1:
@@ -146,7 +148,9 @@ if DEFAULT_FILE_PATH:
 					st.metric("Median (Filtered)", f"${median_filtered:,.2f}")
 				else:
 					st.metric("Median (Filtered)", "No Data")
-
+			
+			st.markdown("---")  # Divider
+			
 			# Third row: Mean (All Grants) and Mean (Filtered)
 			row3_col1, row3_col2 = st.columns(2)
 			with row3_col1:
@@ -166,6 +170,21 @@ if DEFAULT_FILE_PATH:
 
 			# Display the filtered table
 			st.subheader("Filtered Data Table")
+			
+			# Render the table with clickable links
+			st.markdown(
+				filtered_data.to_html(escape=False, index=False),
+				unsafe_allow_html=True
+			)
+			
+			# Allow users to download the filtered data as a CSV file
+			csv = filtered_data.to_csv(index=False)  # Convert DataFrame to CSV
+			st.download_button(
+				label="Download Filtered Data as CSV",
+				data=csv,
+				file_name="filtered_data.csv",
+				mime="text/csv",
+			)
 
 			# Render the table with clickable links
 			st.markdown(
