@@ -53,25 +53,36 @@ if DEFAULT_FILE_PATH:
 		else:
 			# Sidebar filtering
 			st.sidebar.header("Filter Options")
-
+			
 			selected_program = st.sidebar.selectbox(
 				"Select Top Level Program:",
 				options=["All"] + list(sunburst_data["Top Level Primary Program"].unique()),
 				key="selected_program"
 			)
-
+			
 			if selected_program != "All":
 				strategies = sunburst_data[sunburst_data["Top Level Primary Program"] == selected_program]["Primary Strategy"].unique()
 			else:
 				strategies = sunburst_data["Primary Strategy"].unique()
-
+			
 			selected_strategy = st.sidebar.selectbox(
 				"Select Primary Strategy:",
 				options=["All"] + list(strategies),
 				key="selected_strategy"
 			)
-
+			
 			st.sidebar.button("Reset Filters", on_click=reset_filters)
+			
+			# Add a button to download the source file
+			with open(DEFAULT_FILE_PATH, "rb") as source_file:
+				source_data = source_file.read()
+			
+			st.sidebar.download_button(
+				label="Download Source File",
+				data=source_data,
+				file_name="default_grants_data.xlsx",
+				mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			)
 
 			# Apply filters and update metrics dynamically with a loading spinner
 			with st.spinner("Updating data..."):
@@ -160,37 +171,35 @@ if DEFAULT_FILE_PATH:
 					st.metric("Mean (Filtered)", f"${mean_filtered:,.2f}")
 				else:
 					st.metric("Mean (Filtered)", "No Data")
-
+			
+			st.markdown("---")  # Divider
+			
 			# Reorder columns for the table
 			table_columns = ["Top Level Primary Program", "Primary Strategy", "Organization: Organization Name", "Salesforce Link", "Amount"]
 			filtered_data = filtered_data[table_columns]
 
 			# Format the Amount column as currency
 			filtered_data["Amount"] = filtered_data["Amount"].apply(lambda x: f"${x:,.2f}")
-
-			# Display the filtered table
-			st.subheader("Filtered Data Table")
 			
-			# Render the table with clickable links
-			st.markdown(
-				filtered_data.to_html(escape=False, index=False),
-				unsafe_allow_html=True
-			)
-			
-			# Allow users to download the filtered data as a CSV file
-			csv = filtered_data.to_csv(index=False)  # Convert DataFrame to CSV
-			st.download_button(
-				label="Download Filtered Data as CSV",
-				data=csv,
-				file_name="filtered_data.csv",
-				mime="text/csv",
-			)
-
-			# Render the table with clickable links
-			st.markdown(
-				filtered_data.to_html(escape=False, index=False),
-				unsafe_allow_html=True
-			)
+			# Ensure filtered_data exists and is not empty
+			if not filtered_data.empty:
+				# Display the filtered table
+				st.subheader("Filtered Data Table")
+				st.markdown(
+					filtered_data.to_html(escape=False, index=False),
+					unsafe_allow_html=True
+				)
+				
+				# Allow users to download the filtered data as a CSV file
+				csv = filtered_data.to_csv(index=False).encode("utf-8")  # Convert DataFrame to CSV and encode to bytes
+				st.download_button(
+					label="Download Filtered Data as CSV",
+					data=csv,
+					file_name="filtered_data.csv",
+					mime="text/csv",
+				)
+			else:
+				st.warning("No data available to download.")
 	except Exception as e:
 		st.error(f"Error loading default data: {e}")
 
