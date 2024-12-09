@@ -1,1 +1,1 @@
-read me tbb
+This Streamlit app visualizes the 2024 grants data for the Foundation.
