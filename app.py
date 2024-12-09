@@ -174,22 +174,11 @@ if DEFAULT_FILE_PATH:
 			
 			st.markdown("---")  # Divider
 			
-			# Reorder columns for the table
-			table_columns = ["Top Level Primary Program", "Primary Strategy", "Organization: Organization Name", "Salesforce Link", "Amount"]
-			filtered_data = filtered_data[table_columns]
-
-			# Format the Amount column as currency
-			filtered_data["Amount"] = filtered_data["Amount"].apply(lambda x: f"${x:,.2f}")
-			
 			# Ensure filtered_data exists and is not empty
 			if not filtered_data.empty:
-				# Display the filtered table
+				# Display the filtered data section header
 				st.subheader("Filtered Data Table")
-				st.markdown(
-					filtered_data.to_html(escape=False, index=False),
-					unsafe_allow_html=True
-				)
-				
+			
 				# Allow users to download the filtered data as a CSV file
 				csv = filtered_data.to_csv(index=False).encode("utf-8")  # Convert DataFrame to CSV and encode to bytes
 				st.download_button(
@@ -198,8 +187,22 @@ if DEFAULT_FILE_PATH:
 					file_name="filtered_data.csv",
 					mime="text/csv",
 				)
+				
+				# Display the filtered table
+				st.markdown(
+					filtered_data.to_html(escape=False, index=False),
+					unsafe_allow_html=True
+				)
 			else:
 				st.warning("No data available to download.")
+			
+			# Reorder columns for the table
+			table_columns = ["Top Level Primary Program", "Primary Strategy", "Organization: Organization Name", "Salesforce Link", "Amount"]
+			filtered_data = filtered_data[table_columns]
+
+			# Format the Amount column as currency
+			filtered_data["Amount"] = filtered_data["Amount"].apply(lambda x: f"${x:,.2f}")
+			
 	except Exception as e:
 		st.error(f"Error loading default data: {e}")
 
